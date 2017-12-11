@@ -50,16 +50,20 @@ class PortSpider(scrapy.Spider):
                 encrypted = devided[1]
                 num_cryp = devided[0].split("^")
             
-            if len(num_cryp[0]) == 1:
-                num = num_cryp[0]
-            elif len(num_cryp[1]) == 1:
-                num = num_cryp[1]
-	    else:
-		print("encrypted not single digit")
-            
-            dic_numbers[encrypted] = num
+            try:
+                num = int(num_cryp[0])
+                
+            except:
+                
+                try:
+                     num = int(num_cryp[1])
+                     
+                except:
+                    print("encrypted not integer, can't be a port numer")
+                    
+            dic_numbers[encrypted] = str(num)
 
-    	#fining port and ip adress
+        #fining port and ip adress
         for i in part:
             variables = re.findall("\+\((\w+)\^(\w+)\)", i) 
            
