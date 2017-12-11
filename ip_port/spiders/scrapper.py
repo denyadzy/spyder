@@ -2,6 +2,7 @@
 import scrapy
 import re
 from ..items import DataFields
+from itertools import cycle
 
 
 class PortSpider(scrapy.Spider):
@@ -36,13 +37,20 @@ class PortSpider(scrapy.Spider):
 
         # found all xor statemnts
         keys = [x for x in dependences if "^"  in x]
+        values = [x for x in dependences if "^"  not in x]
         
+        dic_params = {} # dic of params 
+        for i in values:
+            # spliting string into encrypted var, number and decrypter var
+            devided = i.split("=")
+            dic_params[devided[0]] = int(devided[1])
+            
         dic_numbers = {} # dic of encrypted numbers
+        dic_vars ={}
         for i in keys:
             # spliting string into encrypted var, number and decrypter var
             devided = i.split("=")
-
-            #while in encrypting uses only one operand ^ we can hardcoding: 
+            #while in encrypting uses only one operand ^ we can devideinto value and parametr: 
             try:
                 encrypted = devided[0]
                 num_cryp = devided[1].split("^")
@@ -51,6 +59,7 @@ class PortSpider(scrapy.Spider):
                 num_cryp = devided[0].split("^")
             
             try:
+                
                 num = int(num_cryp[0])
                 
             except:
@@ -59,7 +68,15 @@ class PortSpider(scrapy.Spider):
                      num = int(num_cryp[1])
                      
                 except:
-                    print("encrypted not integer, can't be a port numer")
+                    
+                    try:# cathing, if XOR to two variables
+                        dic_vars[encrypted] = dic_params[num_cryp[0]]^dic_params[num_cryp[1]]
+                        
+                    except:
+                        print("encrypted not integer, can't be a port numer")
+                    
+                        
+                    
                     
             dic_numbers[encrypted] = str(num)
 
@@ -71,10 +88,20 @@ class PortSpider(scrapy.Spider):
             for item in variables:
                 if item[0] in dic_numbers:
                     port += dic_numbers[item[0]]
+                    
                 elif item[1] in dic_numbers:
                     port += dic_numbers[item[1]]
+                    
                 else:
-                    print("some undefinite encryped item", item)
+                    try:
+                        port += str(dic_vars[item[0]]^dic_params[item[1]])
+                    except:
+                        
+                        try:
+                            port += str(dic_vars[item[1]]^dic_params[item[0]])
+                        
+                        except:
+                            print("some undefinite encryped item", item)
                 
             ip_adress = re.findall('\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', i)[0]
             
