@@ -24,7 +24,7 @@ USER_AGENT = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:57.0) Gecko/20100101 Fi
 # Configure a delay for requests for the same website (default: 0)
 # See http://scrapy.readthedocs.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY=0.25
+DOWNLOAD_DELAY=0.05
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN=16
 #CONCURRENT_REQUESTS_PER_IP=16
