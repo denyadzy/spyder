@@ -2,7 +2,6 @@
 import scrapy
 import re
 from ..items import DataFields
-from itertools import cycle
 
 
 class PortSpider(scrapy.Spider):
@@ -24,7 +23,7 @@ class PortSpider(scrapy.Spider):
 
         """Function for parsing. Filling database."""
 
-	#get content of cell
+	#get content of all first tags td 
         part = response.xpath("//table[2]//table//tr[@onmouseover]//td[@colspan ='1'][1] ").extract() 
 
         # found value of variables in skript tag
@@ -71,11 +70,11 @@ class PortSpider(scrapy.Spider):
                      
                 except:
                     
-                    try:# cathing, if XOR to two variables from list
+                    try:# cathing, if XORing two variables from list
                         dic_vars[encrypted] = dic_params[num_cryp[0]]^dic_params[num_cryp[1]]
                         
                     except:
-                        print("encrypted not integer, can't be a port numer")
+                        raise TypeError("item not integer, can't be a port numer")
                     
                         
                     
@@ -88,7 +87,7 @@ class PortSpider(scrapy.Spider):
            
             port = ""
             for item in variables:
-                # findind value of XOR of value and variable
+                # finding value of XOR of value and variable
                 if item[0] in dic_numbers:
                     port += dic_numbers[item[0]]
                     
@@ -105,9 +104,15 @@ class PortSpider(scrapy.Spider):
                             port += str(dic_vars[item[1]]^dic_params[item[0]])
                         # can't find any match
                         except:
-                            print("some undefinite encryped item", item)
+                            raise ValueError("some undefinite encryped item", item)
+                            
+            try:                
+                ip_adress = re.findall('\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', i)[0]
                 
-            ip_adress = re.findall('\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', i)[0]
+            except:
+                print("there is no ip adress in the table!!!", i)
+                ip_adress = "xxxx"
+                
             
             table_row = DataFields()
             table_row['ip_adress'] = ip_adress
